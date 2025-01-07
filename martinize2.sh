@@ -91,11 +91,79 @@ gmx mdrun -deffnm minimization-vac -v
     -4. minimization-vac.edr: Energy file with information on potential energy.
 # Key Points to Remember
 # 1. Why Minimize in Vacuum?
-    - It ensures that the protein structure is free of steric clashes before solvation and further simulations.
-    - Vacuum minimization is faster since it doesn't include water or ions.
+    -It ensures that the protein structure is free of steric clashes before solvation and further simulations.
+
+    -Vacuum minimization is faster since it doesn't include water or ions.
 2. How to Ensure Correct Topology?
     -Always verify that the topology file includes the appropriate martini_v3.0.0.itp file.
 #Box Dimensions:
     -Box size should be sufficiently large to prevent interactions between periodic images.
 #Customizing Parameters:
     -Adjust minimization.mdp settings (e.g., nsteps) as needed for your system.
+##############
+
+
+# Step 15: Solvate the System
+# Use `gmx solvate` to add water molecules around the protein structure, ensuring the box is sufficiently large to prevent 
+# periodic boundary artifacts.
+    -cp minimization-vac.gro: Input file containing the minimized protein structure in vacuum.
+    -cs water.gro: Equilibrated water box file for MARTINI (this can be downloaded from the tutorial or template folder).
+    -radius 0.21: Minimum van der Waals distance between solute (protein) and solvent (water molecules) to avoid overlaps or clashes.
+    -o solvated.gro: Output file containing the protein surrounded by water molecules.
+    
+gmx solvate -cp minimization-vac.gro -cs water.gro -radius 0.21 -o solvated.gro
+
+# Resulting Files:
+    -1. solvated.gro: Protein structure surrounded by coarse-grained water beads.
+    -2. t4l_only.top: Automatically updated to include the added water molecules.
+
+# Key Points to Remember:
+# - Ensure the water box (water.gro) is compatible with the MARTINI force field.
+# - Use a sufficiently large `-radius` value to avoid steric clashes.
+
+# Step 16: Preprocess for Ion Addition
+# Prepare the system to add ions by creating a .tpr file that combines the structure, topology, and parameter files.
+# -p t4l_only.top: Topology file of the solvated system.
+# -f ions.mdp: Parameter file for ion addition (you can use a generic parameter file or adapt the minimization.mdp file).
+# -c solvated.gro: Input file containing the solvated system.
+# -o ions.tpr: Output file for ion addition preparation.
+gmx grompp -p t4l_only.top -f ions.mdp -c solvated.gro -o ions.tpr
+
+# Resulting Files:
+# 1. ions.tpr: Preprocessed file for adding ions.
+
+# Key Points to Remember:
+# - Ensure the topology file (t4l_only.top) includes MARTINI ion topology files.
+
+# Step 17: Neutralize the System
+# Use `gmx genion` to add neutralizing ions to balance the system's charge.
+# -s ions.tpr: Input file prepared for ion addition.
+# -o solvated_ions.gro: Output file containing the neutralized system.
+# -p t4l_only.top: Topology file, which will be updated to include the added ions.
+# -pname NA: Specifies the name of the positive ion (e.g., Na+).
+# -nname CL: Specifies the name of the negative ion (e.g., Cl−).
+# -neutral: Automatically calculates and adds ions to neutralize the system's net charge (+8 in this case).
+gmx genion -s ions.tpr -o solvated_ions.gro -p t4l_only.top -pname NA -nname CL -neutral
+
+# Resulting Files:
+# 1. solvated_ions.gro: System with neutralized charge.
+# 2. Updated t4l_only.top: Topology file includes water molecules and neutralizing ions.
+
+# Key Points to Remember:
+# - Ensure the MARTINI ion topology files are included in t4l_only.top.
+# - Verify that the system's net charge is now 0.
+
+# Step 18: Add Physiological Ionic Strength
+# To represent physiological conditions, add additional NaCl ions to achieve a concentration of 0.15 M.
+# Note: Each MARTINI water bead represents 4 water molecules, so adjust the target salt concentration accordingly.
+# -conc 0.15: Specifies the salt concentration in mol/L.
+# -neutral: Ensures the system remains neutral while adding extra ions.
+gmx genion -s ions.tpr -o solvated_salt.gro -p t4l_only.top -pname NA -nname CL -neutral -conc 0.15
+
+# Resulting Files:
+# 1. solvated_salt.gro: Neutralized system with added NaCl ions to achieve 0.15 M ionic strength.
+# 2. Updated t4l_only.top: Topology file includes water molecules and ions.
+
+# Key Points to Remember:
+# - Physiological salt concentration (0.15 M NaCl) mimics realistic conditions.
+# - Adjust for MARTINI water representation (1 bead = 4 water molecules).
