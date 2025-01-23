@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #Step 1: Clone the MARTINI Repository
 git clone https://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@github.com/ImranNoor92/martini_ff.git
 #Purpose: Clones the MARTINI repository from GitHub using your personal access token (PAT) for authentication.
@@ -5,7 +7,7 @@ git clone https://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@github.com/ImranNoor9
 
 #Steo 2: Create and Navigate to the Working Directory
 mkdir martini_tutorial
-cd martini_tutorial/
+cd martini_tutorial/ || exit
 #Purpose: Creates a new directory named `martini_tutorial` and navigates into it.
 #Step 3: Download the Protein Structure File
 wget http://www.rcsb.org/pdb/files/181L.pdb
@@ -25,6 +27,7 @@ pip install git+https://github.com/marrink-lab/vermouth-martinize.git#vermouth
 #Step 7: Add `martinize2` to PATH
 nano ~/.bashrc
 export PATH=$PATH:~/.local/bin
+# shellcheck source=/dev/null
 source ~/.bashrc
 #Purpose: Adds the `martinize2` executable to the system PATH for easy access. 
 #Step 8: Test `martinize2`
@@ -41,7 +44,7 @@ martinize2 -f 181L_clean.pdb -o t4l_only.top -x t4l_cg.pdb -p backbone -ff marti
 # Result: Generates the coarse-grained files.
 #Step 10: Clone the DSSP Repository
 git clone https://github.com/cmbi/dssp.git
-cd dssp
+cd dssp || exit
 ./autogen.sh
 ./configure
 make
@@ -85,17 +88,18 @@ gmx mdrun -deffnm minimization-vac -v
 # -v: Enables verbose mode to show progress in the terminal.
 # Resulting Files
 #After running the minimization, you should have the following:
-    -1. minimization-vac.gro: Minimized structure in vacuum.
-    -2. minimization-vac.log: Log file with details of the minimization.
-    -3. minimization-vac.trr: Trajectory file of the minimization.
-    -4. minimization-vac.edr: Energy file with information on potential energy.
+    # 1. minimization-vac.gro: Minimized structure in vacuum.
+    # 2. minimization-vac.log: Log file with details of the minimization.
+    # 3. minimization-vac.trr: Trajectory file of the minimization.
+    # 4. minimization-vac.edr: Energy file with information on potential energy.
 # Key Points to Remember
 # 1. Why Minimize in Vacuum?
-    - It ensures that the protein structure is free of steric clashes before solvation and further simulations.
-    - Vacuum minimization is faster since it doesn't include water or ions.
-2. How to Ensure Correct Topology?
-    -Always verify that the topology file includes the appropriate martini_v3.0.0.itp file.
+    # It ensures that the protein structure is free of steric clashes before solvation and further simulations.
+    # shellcheck disable=SC1009
+    #    - Vacuum minimization is faster since it doesnt include water or ions.
+# 2. How to Ensure Correct Topology?
+    #    -Always verify that the topology file includes the appropriate martini_v3.0.0.itp file.
 #Box Dimensions:
-    -Box size should be sufficiently large to prevent interactions between periodic images.
+    # Box size should be sufficiently large to prevent interactions between periodic images.
 #Customizing Parameters:
-    -Adjust minimization.mdp settings (e.g., nsteps) as needed for your system.
+    #    -Adjust minimization.mdp settings \(e.g., nsteps\) as needed for your system.
