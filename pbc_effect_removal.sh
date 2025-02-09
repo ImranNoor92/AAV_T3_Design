@@ -15,6 +15,9 @@ gmx trjconv -f dynamic.xtc -s dynamic.tpr -o centered.xtc -center -pbc mol
 # - `-o centered.xtc`: Output trajectory file with the protein centered and PBC artifacts removed.
 # - `-center`: Centers the protein in the simulation box.
 # - `-pbc mol`: Ensures each molecule (e.g., the protein) is kept whole across PBC boundaries.
+# Group selection:
+# - Select "Protein" (1) to center the protein.
+# - Select "System" (0) for output.
 
 # Interactive Selection:
 # 1. Select the group for centering:
@@ -28,9 +31,10 @@ gmx trjconv -f centered.xtc -s dynamic.tpr -o viz.xtc -fit rot+trans
 # Explanation:
 # - `-fit rot+trans`: Aligns the trajectory by removing overall rotation and translation of the system.
 # - `-o viz.xtc`: Output trajectory file optimized for visualization.
+# - Select "Protein" (1) to center the protein.
+# - Select "System" (0) for output.
 
 # === Step 22 : Visualize the Corrected Trajectory ===
-
 echo "Visualizing centered trajectory in VMD..."
 vmd equilibration.gro viz.xtc
 # Explanation:
@@ -45,6 +49,9 @@ pymol viz.pdb
 # - Converts the trajectory to PDB format for compatibility with PyMOL.
 # - Adds bond information using the `-conect` flag.#This step is important for analyzing and visualizing the trajectory data without artifacts from periodic boundary effectsecho "Creating index file for RMSD of Protein and Backbone Beads..."
 gmx make_ndx -f equilibration.gro -o protein_bb.ndx
+#alternatively
+gmx rms -s dynamic.tpr -f dynamic.xtc -n protein_bb.ndx -o rmsd_protein_bb.xvg -b 20000 -e 60000
+
 # Explanation:
 # - `gmx make_ndx`: Generates or modifies index files.
 # - `-f equilibration.gro`: Input structure file from the equilibration step.
