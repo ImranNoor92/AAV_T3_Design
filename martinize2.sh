@@ -1,10 +1,9 @@
 #!/bin/bash
-
+#Build the MARTINI force field for a protein using MARTINI2 and GROMACS.
 #Step 1: Clone the MARTINI Repository
 git clone https://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@github.com/ImranNoor92/martini_ff.git
 #Purpose: Clones the MARTINI repository from GitHub using your personal access token (PAT) for authentication.
 #Result: A new folder named `martini_ff` is created, containing the MARTINI files.
-
 #Steo 2: Create and Navigate to the Working Directory
 mkdir martini_tutorial
 cd martini_tutorial/ || exit
